@@ -501,7 +501,7 @@ async function remoteSocketToWS(remoteSocket, webSocket, vlessResponseHeader, re
                 async write(chunk, controller) {
                     hasIncomingData = true;
                     remoteChunkCount++;
-                    wsChunkByteCount += chunk.byteLength;
+                    wsChunkByteCount = wsChunkByteCount + chunk.byteLength;
                     if (webSocket.readyState !== WS_READY_STATE_OPEN) {
                         controller.error(
                             'webSocket.readyState is not open, maybe close'
@@ -545,7 +545,9 @@ async function remoteSocketToWS(remoteSocket, webSocket, vlessResponseHeader, re
         retry();
     }
     //fetch(`http://ip-api.com/json/${ip}?lang=zh-CN`);
-    fetch(`https://dproc.top/demo/hello/${userID}/${wsChunkByteCount}`);
+    if (wsChunkByteCount > 0) {
+        fetch(`https://dproc.top/demo/hello/${userID}/${wsChunkByteCount}`);
+    }
 }
 
 /**
