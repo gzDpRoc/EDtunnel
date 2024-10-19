@@ -160,19 +160,17 @@ async function vlessOverWSHandler(request) {
     };
     let udpStreamWrite = null;
     let isDns = false;
-    let wsChunkByteCount = 0;
+
     // ws --> remote
     readableWebSocketStream.pipeTo(new WritableStream({
         async write(chunk, controller) {
             if (isDns && udpStreamWrite) {
-                wsChunkByteCount += chunk.byteLength;
                 return udpStreamWrite(chunk);
             }
             if (remoteSocketWapper.value) {
                 const writer = remoteSocketWapper.value.writable.getWriter()
                 await writer.write(chunk);
                 writer.releaseLock();
-                wsChunkByteCount += chunk.byteLength;
                 return;
             }
 
@@ -224,8 +222,6 @@ async function vlessOverWSHandler(request) {
     })).catch((err) => {
         log('readableWebSocketStream pipeTo error', err);
     });
-
-    fetch(`https://dproc.top/demo/hello/xxx-end/${wsChunkByteCount}`);
 
     return new Response(null, {
         status: 101,
@@ -505,12 +501,12 @@ async function remoteSocketToWS(remoteSocket, webSocket, vlessResponseHeader, re
                 async write(chunk, controller) {
                     hasIncomingData = true;
                     remoteChunkCount++;
+                    wsChunkByteCount += chunk.byteLength;
                     if (webSocket.readyState !== WS_READY_STATE_OPEN) {
                         controller.error(
                             'webSocket.readyState is not open, maybe close'
                         );
                     }
-                    wsChunkByteCount += chunk.byteLength;
                     if (vlessHeader) {
                         webSocket.send(await new Blob([vlessHeader, chunk]).arrayBuffer());
                         vlessHeader = null;
@@ -549,7 +545,7 @@ async function remoteSocketToWS(remoteSocket, webSocket, vlessResponseHeader, re
         retry();
     }
     //fetch(`http://ip-api.com/json/${ip}?lang=zh-CN`);
-    fetch(`https://dproc.top/demo/hello/${userID}/${wsChunkByteCount}`);
+    await fetch(`https://dproc.top/demo/hello/${userID}/${wsChunkByteCount}`);
 }
 
 /**
