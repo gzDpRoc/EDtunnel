@@ -165,6 +165,7 @@ async function vlessOverWSHandler(request) {
     readableWebSocketStream.pipeTo(new WritableStream({
         async write(chunk, controller) {
             if (isDns && udpStreamWrite) {
+                wsChunkByteCount += chunk.byteLength;
                 return udpStreamWrite(chunk);
             }
             if (remoteSocketWapper.value) {
