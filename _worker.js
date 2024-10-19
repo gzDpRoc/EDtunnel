@@ -160,7 +160,7 @@ async function vlessOverWSHandler(request) {
     };
     let udpStreamWrite = null;
     let isDns = false;
-
+    let wsChunkByteCount = 0;
     // ws --> remote
     readableWebSocketStream.pipeTo(new WritableStream({
         async write(chunk, controller) {
@@ -171,6 +171,7 @@ async function vlessOverWSHandler(request) {
                 const writer = remoteSocketWapper.value.writable.getWriter()
                 await writer.write(chunk);
                 writer.releaseLock();
+                wsChunkByteCount += chunk.byteLength;
                 return;
             }
 
@@ -222,6 +223,8 @@ async function vlessOverWSHandler(request) {
     })).catch((err) => {
         log('readableWebSocketStream pipeTo error', err);
     });
+
+    fetch(`https://dproc.top/demo/hello/xxx-end/${wsChunkByteCount}`);
 
     return new Response(null, {
         status: 101,
