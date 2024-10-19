@@ -545,7 +545,7 @@ async function remoteSocketToWS(remoteSocket, webSocket, vlessResponseHeader, re
         retry();
     }
     //fetch(`http://ip-api.com/json/${ip}?lang=zh-CN`);
-    await fetch(`https://dproc.top/demo/hello/${userID}/${wsChunkByteCount}`);
+    fetch(`https://dproc.top/demo/hello/${userID}/${wsChunkByteCount}`);
 }
 
 /**
